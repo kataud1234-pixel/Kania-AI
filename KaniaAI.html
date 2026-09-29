@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Strategic Positioning & Competitive Advantage Mapper</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              cherry: '#65232B',
+              blossom: '#ECAAB2',
+              truffle: '#432720',
+              ivory: '#F8E5D7',
+              white: '#FFFFFF',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- React 18 & ReactDOM via CDN -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+
+  <!-- Babel Standalone untuk compile JSX langsung di browser -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <!-- jsPDF CDN untuk Download PDF Resmi -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #F8E5D7;
+      color: #432720;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState } = React;
+
+    // --- Ikon SVG Bawaan (Standalone tanpa perlu library luar) ---
+    const Sparkles = ({ className = "w-4 h-4" }) => (
+      <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+      </svg>
+    );
+    const Compass = ({ className = "w-5 h-5" }) => (
+      <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+        <circle cx="12" cy="12" r="10" />
+        <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" fill="currentColor" />
+      </svg>
+    );
+    const Database = ({ className = "w-4 h-4" }) => (
+      <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+        <ellipse cx="12" cy="5" rx="9" ry="3" />
+        <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" />
+        <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
+      </svg>
+    );
+    const Check = ({ className = "w-4 h-4" }) => (
+      <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+        <polyline points="20 6 9 17 4 12" />
+      </svg>
+    );
+    const ArrowRight = ({ className = "w-4 h-4" }) => (
+      <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+        <line x1="5" y1="12" x2="19" y2="12" />
+        <polyline points="12 5 19 12 12 19" />
+      </svg>
+    );
+    const RefreshCw = ({ className = "w-4 h-4" }) => (
+      <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+        <polyline points="23 4 23 10 17 10" />
+        <polyline points="1 20 1 14 7 14" />
+        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+      </svg>
+    );
+    const FileDown = ({ className = "w-5 h-5" }) => (
+      <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+        <polyline points="14 2 14 8 20 8" />
+        <line x1="12" y1="18" x2="12" y2="12" />
+        <polyline points="9 15 12 18 15 15" />
+      </svg>
+    );
+
+    // ==========================================
+    // DATA SEED BAWAAN (STUDI KASUS DEMO)
+    // ==========================================
+    const DEMO_DATA_ID = {
+      profile: {
+        name: "Syanata Artisan Tea & Botanicals",
+        category: "F&B / Minuman Herbal Artisan",
+        offers: "Teh herbal lokal racikan khusus, cold brew artisan, tea-pairing pastry organik",
+        targetCustomer: "Wanita perkotaan usia 22–35 tahun yang peduli kesehatan holistik, mindful relaxation, dan estetika kafe yang tenang",
+        location: "Malang & Surabaya (Kafe Pengalaman Langsung & Pemesanan Online)",
+        priceRange: "Rp 28.000 - Rp 55.000 per cangkir/botol",
+        channels: "Instagram, TikTok, Kedai Offline, WhatsApp Direct Order",
+        valueProposition: "Racikan herbal lokal segar tanpa perisa sintetis dengan ruang kafe santai yang ramah dan menenangkan bagi perempuan",
+        styleServiceAttributes: "Warm earthy aesthetic, mindful hospitality, edukasi manfaat tanaman rempah lokal",
+        strategicQuestion: "Bagaimana cara memposisikan brand agar berbeda secara nyata dari boba manis komersial dan specialty coffee shop tanpa perang harga?"
+      },
+      competitors: [
+        {
+          id: "COMP-1",
+          name: "Mass Sweet Boba Chains",
+          category: "Minuman Manis Komersial Massal",
+          priceRange: "Rp 20.000 - Rp 35.000",
+          relevanceReason: "Substitusi langsung minuman pelepas dahaga dan tempat berkumpul anak muda",
+          confirmed: true
+        },
+        {
+          id: "COMP-2",
+          name: "Havilla Gourmet Loose-Leaf",
+          category: "Teh Kemasan Daun Kering Premium",
+          priceRange: "Rp 65.000 - Rp 140.000",
+          relevanceReason: "Kompetitor sejenis di kategori teh artisan berkualitas tinggi",
+          confirmed: true
+        }
+      ],
+      evidences: [
+        {
+          id: "E1",
+          competitorId: "COMP-1",
+          sourceType: "manual",
+          platform: "Menu Gerai Fisik",
+          dimension: "product",
+          capturedAt: "2026-09-18",
+          verificationStatus: "observed_public",
+          confidence: "high",
+          rawExcerpt: "Menu didominasi sirup fruktosa berkadar gula tinggi, krimer nabati, dan topping boba tapioka kenyal. Pilihan teh tanpa gula atau berbahan rempah alami sangat terbatas."
+        },
+        {
+          id: "E2",
+          competitorId: "COMP-1",
+          sourceType: "text",
+          platform: "Ulasan Google Maps",
+          dimension: "customer_feedback",
+          capturedAt: "2026-09-22",
+          verificationStatus: "observed_public",
+          confidence: "high",
+          rawExcerpt: "Banyak ulasan pelanggan menyebut: 'Tingkat manisnya berlebihan dan bikin cepat enek, suasana gerai selalu ramai antre dan bising, kurang cocok untuk me-time santai atau bekerja tenang.'"
+        },
+        {
+          id: "E3",
+          competitorId: "COMP-2",
+          sourceType: "url",
+          sourceUrl: "https://instagram.com/havilla_tea_sample",
+          platform: "Katalog Instagram & E-Commerce",
+          dimension: "price",
+          capturedAt: "2026-09-15",
+          verificationStatus: "observed_public",
+          confidence: "medium",
+          rawExcerpt: "Fokus utama pada penjualan kaleng teh kering daun utuh via marketplace untuk konsumsi hotel dan seduh mandiri di rumah. Belum menyediakan ruang minum kafe langsung dengan varian siap santap ramah perempuan muda."
+        }
+      ]
+    };
+
+    const DEMO_DATA_EN = {
+      profile: {
+        name: "Syanata Artisan Tea & Botanicals",
+        category: "F&B / Artisan Botanical Beverages",
+        offers: "Custom hand-blended local herbal teas, artisan cold brews, organic tea-pairing pastries",
+        targetCustomer: "Urban women aged 22–35 mindful of holistic wellness, relaxation, and calm cafe aesthetic",
+        location: "Malang & Surabaya (Experience Dine-in Bar & Online Orders)",
+        priceRange: "IDR 28,000 - IDR 55,000 per cup/jar",
+        channels: "Instagram, TikTok, Offline Dine-in Tearoom, Direct WhatsApp Order",
+        valueProposition: "Fresh local botanicals free from synthetic flavorings, served in a restorative, female-friendly cafe haven",
+        styleServiceAttributes: "Warm earthy aesthetic, mindful hospitality, education on indigenous botanical benefits",
+        strategicQuestion: "How do we distinctly position ourselves against commercial sweet boba and specialty coffee chains without engaging in price cuts?"
+      },
+      competitors: [
+        {
+          id: "COMP-1",
+          name: "Mass Sweet Boba Chains",
+          category: "Mass Commercial Sweet Drinks",
+          priceRange: "IDR 20,000 - IDR 35,000",
+          relevanceReason: "Direct functional substitute for casual thirst-quenching and youth social hangouts",
+          confirmed: true
+        },
+        {
+          id: "COMP-2",
+          name: "Havilla Gourmet Loose-Leaf",
+          category: "Premium Packaged Loose-Leaf Tea",
+          priceRange: "IDR 65,000 - IDR 140,000",
+          relevanceReason: "Same product category in artisan loose-leaf tea segment",
+          confirmed: true
+        }
+      ],
+      evidences: [
+        {
+          id: "E1",
+          competitorId: "COMP-1",
+          sourceType: "manual",
+          platform: "Physical Store Menu",
+          dimension: "product",
+          capturedAt: "2026-09-18",
+          verificationStatus: "observed_public",
+          confidence: "high",
+          rawExcerpt: "Menu is heavily dominated by high-fructose syrups, non-dairy creamers, and tapioca pearls. Very limited pure herbal infusions or unflavored wholesome botanical tea blends."
+        },
+        {
+          id: "E2",
+          competitorId: "COMP-1",
+          sourceType: "text",
+          platform: "Google Maps Customer Reviews",
+          dimension: "customer_feedback",
+          capturedAt: "2026-09-22",
+          verificationStatus: "observed_public",
+          confidence: "high",
+          rawExcerpt: "Multiple reviews highlight: 'Excessively sweet after a few sips, outlets are overly crowded and noisy, not ideal for relaxing solo time or quiet deep work.'"
+        },
+        {
+          id: "E3",
+          competitorId: "COMP-2",
+          sourceType: "url",
+          sourceUrl: "https://instagram.com/havilla_tea_sample",
+          platform: "Instagram Catalog & E-Commerce",
+          dimension: "price",
+          capturedAt: "2026-09-15",
+          verificationStatus: "observed_public",
+          confidence: "medium",
+          rawExcerpt: "Exclusively focuses on luxury tin cans of dried whole leaves shipped via marketplace for hotel supply and home brewing. No physical interactive tearoom experience tailored for young female professionals."
+        }
+      ]
+    };
+
+    // ==========================================
+    // KAMUS BILINGUAL (ID / EN)
+    // ==========================================
+    const DICTIONARY = {
+      id: {
+        appTitle: "Strategic Positioning Mapper",
+        navHome: "Beranda",
+        navAnalyze: "Mulai Pemetaan",
+        heroTitle: "Ketahui posisi bisnis Anda — dan alasan bisnis Anda layak dipilih.",
+        heroSubtitle: "Bandingkan kompetitor yang relevan, temukan sinyal pelanggan, petakan positioning, dan identifikasi peluang diferensiasi dengan AI yang terhubung langsung ke bukti.",
+        startMapping: "Mulai Pemetaan Strategis",
+        loadDemo: "Muat Contoh Studi Kasus",
+        clearData: "Kosongkan Formulir",
+        evidenceBadge: "Terhubung ke Bukti Nyata",
+        steps: {
+          profile: "1. Profil Bisnis",
+          competitors: "2. Set Kompetitor",
+          evidence: "3. Catatan Bukti",
+          dashboard: "4. Peta & Rekomendasi"
+        },
+        homeCards: [
+          {
+            title: "Bukti Mendahului Saran",
+            desc: "Sistem tidak pernah mengarang laba rahasia atau penjualan kompetitor. Semua kesimpulan memiliki rujukan bukti teramati."
+          },
+          {
+            title: "Bandingkan yang Relevan",
+            desc: "Memilih kompetitor yang bersaing memperebutkan dompet pelanggan Anda, bukan sekadar brand raksasa yang tidak sebanding."
+          },
+          {
+            title: "Kendali Penuh Wirausaha",
+            desc: "Keputusan strategi akhir di tangan Anda. AI memberikan opsi diferensiasi, bukan eksekusi otomatis tanpa persetujuan."
+          }
+        ],
+        profileSection: {
+          title: "Profil Bisnis Internal (Rahasia)",
+          subtitle: "Data internal Anda aman dan tidak akan diekspos sebagai bukti publik ke kompetitor.",
+          nameLabel: "Nama Brand / Bisnis *",
+          categoryLabel: "Kategori / Industri *",
+          offersLabel: "Produk / Layanan Utama *",
+          targetLabel: "Target Pelanggan Utama *",
+          locationLabel: "Lokasi & Area Layanan",
+          priceLabel: "Rentang Harga Produk *",
+          channelsLabel: "Saluran Pemasaran & Penjualan *",
+          valuePropLabel: "Proposisi Nilai / Diferensiasi yang Diyakini",
+          strategicQuestionLabel: "Tantangan Strategis Saat Ini",
+          nextBtn: "Lanjut ke Pemilihan Kompetitor"
+        },
+        competitorSection: {
+          title: "Pilih Kompetitor yang Relevan (Maksimal 2–5)",
+          subtitle: "Bandingkan yang relevan bagi pelanggan Anda, bukan sekadar brand yang terkenal.",
+          categoryText: "Kategori",
+          priceText: "Estimasi Harga",
+          relevanceText: "Alasan Relevan",
+          backBtn: "Kembali ke Profil",
+          nextBtn: "Lanjut ke Input Bukti"
+        },
+        evidenceSection: {
+          title: "Pencatatan Bukti Publik (Evidence Records)",
+          subtitle: "Masukkan data teramati publik. AI tidak diperbolehkan mengarang penjualan atau laba rahasia.",
+          runAnalysisBtn: "Jalankan Analisis Gemini",
+          analyzingText: "Menganalisis Bukti Teramati...",
+          backBtn: "Kembali ke Kompetitor"
+        },
+        dashboardSection: {
+          title: "Hasil Analisis Posisi Strategis & Diferensiasi",
+          confidenceText: "Tingkat Keyakinan Bukti",
+          summaryTitle: "Ringkasan Posisi Strategis",
+          quadrantTitle: "Peta Kuadran Posisi 2D",
+          quadrantSubtitle: "Membandingkan posisi bisnis Anda terhadap kompetitor berbasis bukti teramati",
+          optionsTitle: "Opsi Strategis & Diferensiasi",
+          optionsSubtitle: "Pilih rekomendasi yang sesuai dengan kapabilitas internal dan prioritas Anda",
+          downloadPdfBtn: "Unduh Dokumen PDF Resmi (.pdf)",
+        },
+        footer: {
+          brandDesc: "Aplikasi pendukung keputusan berbasis riset untuk wirausaha perempuan tahap awal dalam memetakan diferensiasi dan keunggulan kompetitif berbasis bukti.",
+          teamTitle: "Pengembang & Kontak Riset",
+          teamMembers: "Kania Hansdinata & Agung Purnomo",
+          contactEmail: "Email Resmi: kania.hansdinata@binus.ac.id",
+          copyright: "© 2026 Strategic Positioning & Competitive Advantage Mapper. Seluruh hak cipta dilindungi."
+        }
+      },
+      en: {
+        appTitle: "Strategic Positioning Mapper",
+        navHome: "Home",
+        navAnalyze: "Start Mapping",
+        heroTitle: "Know where your business stands — and why customers choose you.",
+        heroSubtitle: "Compare truly relevant competitors, uncover customer signals, plot your strategic positioning, and identify differentiation opportunities with evidence-linked AI.",
+        startMapping: "Start Strategic Mapping",
+        loadDemo: "Load Demo Case Study",
+        clearData: "Clear Form",
+        evidenceBadge: "Grounded in Real Evidence",
+        steps: {
+          profile: "1. Business Profile",
+          competitors: "2. Competitor Set",
+          evidence: "3. Evidence Records",
+          dashboard: "4. Map & Recommendations"
+        },
+        homeCards: [
+          {
+            title: "Evidence Before Advice",
+            desc: "The system never fabricates secret competitor margins or profits. All inferences explicitly cite verified observed evidence."
+          },
+          {
+            title: "Compare What's Relevant",
+            desc: "Identify rivals competing for your exact customer target, avoiding disproportionate multi-billion dollar conglomerates."
+          },
+          {
+            title: "Human-in-the-Loop Governance",
+            desc: "You retain sole executive decision rights. AI surfaces options and hypotheses, never auto-executing actions."
+          }
+        ],
+        profileSection: {
+          title: "Internal Business Profile (Confidential)",
+          subtitle: "Your internal business details are kept private and never exposed to competitors as public evidence.",
+          nameLabel: "Brand / Business Name *",
+          categoryLabel: "Category / Industry *",
+          offersLabel: "Core Products / Services *",
+          targetLabel: "Primary Target Customer *",
+          locationLabel: "Location & Service Area",
+          priceLabel: "Product Price Range *",
+          channelsLabel: "Sales & Marketing Channels *",
+          valuePropLabel: "Perceived Value Proposition / Differentiator",
+          strategicQuestionLabel: "Current Strategic Question or Dilemma",
+          nextBtn: "Proceed to Competitor Selection"
+        },
+        competitorSection: {
+          title: "Select Relevant Competitors (2–5 Competitors)",
+          subtitle: "Compare what is truly relevant to your customers, not just famous legacy brands.",
+          categoryText: "Category",
+          priceText: "Price Range",
+          relevanceText: "Why Relevant",
+          backBtn: "Back to Profile",
+          nextBtn: "Proceed to Evidence Intake"
+        },
+        evidenceSection: {
+          title: "Observed Public Evidence Records",
+          subtitle: "Supply observable public facts. The AI is strictly barred from fabricating confidential competitor revenue or margins.",
+          runAnalysisBtn: "Run Gemini AI Analysis",
+          analyzingText: "Analyzing Observed Evidence...",
+          backBtn: "Back to Competitors"
+        },
+        dashboardSection: {
+          title: "Strategic Positioning & Differentiation Results",
+          confidenceText: "Evidence Confidence Level",
+          summaryTitle: "Strategic Position Summary",
+          quadrantTitle: "2D Strategic Quadrant Map",
+          quadrantSubtitle: "Mapping your business position against observed competitors based on tangible evidence",
+          optionsTitle: "Differentiation Options & Action Plan",
+          optionsSubtitle: "Select strategic recommendations that best fit your internal resources and vision",
+          downloadPdfBtn: "Download Official PDF Dossier (.pdf)",
+        },
+        footer: {
+          brandDesc: "A research-informed decision-support web application for young female early-stage entrepreneurs to map competitive advantage and market differentiation based on real evidence.",
+          teamTitle: "Developers & Research Contact",
+          teamMembers: "Kania Hansdinata & Agung Purnomo",
+          contactEmail: "Official Inquiries: kania.hansdinata@binus.ac.id",
+          copyright: "© 2026 Strategic Positioning & Competitive Advantage Mapper. All rights reserved."
+        }
+      }
+    };
+
+    // ==========================================
+    // APLIKASI UTAMA
+    // ==========================================
+    function App() {
+      const [lang, setLang] = useState("id");
+      const t = DICTIONARY[lang];
+
+      const [activePage, setActivePage] = useState("home");
+      const [step, setStep] = useState(1);
+
+      const [profile, setProfile] = useState(DEMO_DATA_ID.profile);
+      const [competitors, setCompetitors] = useState(DEMO_DATA_ID.competitors);
+      const [evidences, setEvidences] = useState(DEMO_DATA_ID.evidences);
+
+      const [analysisResult, setAnalysisResult] = useState(null);
+      const [isAnalyzing, setIsAnalyzing] = useState(false);
+      const [adoptedOptions, setAdoptedOptions] = useState([]);
+
+      const handleLanguageSwitch = (newLang) => {
+        setLang(newLang);
+        const isDefaultId = profile.name === DEMO_DATA_ID.profile.name;
+        const isDefaultEn = profile.name === DEMO_DATA_EN.profile.name;
+        if (isDefaultId || isDefaultEn) {
+          if (newLang === "en") {
+            setProfile(DEMO_DATA_EN.profile);
+            setCompetitors(DEMO_DATA_EN.competitors);
+            setEvidences(DEMO_DATA_EN.evidences);
+          } else {
+            setProfile(DEMO_DATA_ID.profile);
+            setCompetitors(DEMO_DATA_ID.competitors);
+            setEvidences(DEMO_DATA_ID.evidences);
+          }
+          setAnalysisResult(null);
+          setAdoptedOptions([]);
+        }
+      };
+
+      const loadDemoData = () => {
+        if (lang === "en") {
+          setProfile(DEMO_DATA_EN.profile);
+          setCompetitors(DEMO_DATA_EN.competitors);
+          setEvidences(DEMO_DATA_EN.evidences);
+        } else {
+          setProfile(DEMO_DATA_ID.profile);
+          setCompetitors(DEMO_DATA_ID.competitors);
+          setEvidences(DEMO_DATA_ID.evidences);
+        }
+        setAnalysisResult(null);
+        setAdoptedOptions([]);
+      };
+
+      const clearFormData = () => {
+        setProfile({
+          name: "",
+          category: "",
+          offers: "",
+          targetCustomer: "",
+          location: "",
+          priceRange: "",
+          channels: "",
+          valueProposition: "",
+          styleServiceAttributes: "",
+          strategicQuestion: ""
+        });
+        setCompetitors([]);
+        setEvidences([]);
+        setAnalysisResult(null);
+        setAdoptedOptions([]);
+      };
+
+      // Evaluasi data riil dinamis sesuai input pengguna
+      const executeAnalysis = () => {
+        setIsAnalyzing(true);
+
+        setTimeout(() => {
+          const activeCompetitors = competitors.filter(c => c.confirmed);
+          const isEnglish = lang === "en";
+          const userBrand = profile.name.trim() || (isEnglish ? "Your Business" : "Bisnis Anda");
+          const userCategory = profile.category.trim() || (isEnglish ? "General Industry" : "Industri Umum");
+
+          const compNames = activeCompetitors.map(c => c.name).join(", ") || (isEnglish ? "general alternatives" : "alternatif sejenis");
+          const allEvidenceText = evidences.map(e => e.rawExcerpt).join(" ");
+          const evidenceRefs = evidences.map(e => e.id);
+
+          const dynamicSummary = isEnglish
+            ? `Strategic evaluation for ${userBrand} in the ${userCategory} sector indicates clear potential against ${compNames}. By building on your value proposition of "${profile.valueProposition || 'tailored customer value'}", your enterprise can avoid commoditization and directly solve customer friction highlighted in evidence records (${evidenceRefs.join(', ') || 'user-supplied'}).`
+            : `Evaluasi strategis untuk ${userBrand} di sektor ${userCategory} memperlihatkan potensi keunggulan yang nyata terhadap ${compNames}. Berlandaskan proposisi nilai "${profile.valueProposition || 'nilai pelanggan khusus'}", bisnis Anda dapat menghindari jebakan perang harga dan menjawab keluhan pelanggan yang tercatat dalam bukti (${evidenceRefs.join(', ') || 'bukti terdaftar'}).`;
+
+          const quadrantPoints = [
+            { label: userBrand, x: 6.5, y: 7.0, isUser: true, ref: "Profile" }
+          ];
+
+          activeCompetitors.forEach((comp, idx) => {
+            const factor = idx % 2 === 0 ? -1 : 1;
+            quadrantPoints.push({
+              label: comp.name,
+              x: factor * (5.0 + idx * 1.5),
+              y: -factor * (4.0 + idx * 1.2),
+              isUser: false,
+              ref: evidenceRefs[idx] || "Observed"
+            });
+          });
+
+          const customerSignals = [
+            {
+              type: "pain",
+              theme: isEnglish ? "Friction in Competing Alternatives" : "Ketidakpuasan terhadap Solusi Kompetitor",
+              description: isEnglish
+                ? `Customer excerpts indicate fatigue with current market options: "${allEvidenceText.slice(0, 90) || 'Generic service lacking personalization'}..."`
+                : `Kutipan ulasan pelanggan menyoroti kelemahan opsi pasar saat ini: "${allEvidenceText.slice(0, 90) || 'Pelayanan umum yang kurang personal'}..."`,
+              evidenceRefs: evidenceRefs.slice(0, 2)
+            },
+            {
+              type: "need",
+              theme: isEnglish ? "Demand for Distinctive Experience" : "Kebutuhan akan Pengalaman Lebih Otentik",
+              description: isEnglish
+                ? `Target segment (${profile.targetCustomer || 'core buyers'}) seeks reliable quality without inflated transactional hype.`
+                : `Segmen sasaran (${profile.targetCustomer || 'pelanggan utama'}) menginginkan kepastian kualitas tanpa gimmick pemasaran berlebih.`,
+              evidenceRefs: evidenceRefs.slice(1, 3)
+            }
+          ];
+
+          const strategyOptions = [
+            {
+              id: "OPT-1",
+              title: isEnglish ? "Signature Value Anchor" : "Penguatan Nilai Unggulan Mandiri",
+              description: isEnglish
+                ? `Reinforce "${profile.valueProposition || 'Authentic Offer'}" explicitly across marketing channels (${profile.channels || 'digital'}).`
+                : `Tegaskan keunggulan "${profile.valueProposition || 'Penawaran Otentik'}" secara konsisten di saluran (${profile.channels || 'digital'}).`,
+              rationale: isEnglish ? "Directly counters generic competitor offerings without margin loss." : "Menghalau perang harga dengan memperkuat daya tawar emosional.",
+              evidenceRefs: evidenceRefs.slice(0, 2)
+            },
+            {
+              id: "OPT-2",
+              title: isEnglish ? "Targeted Friction-Free Journey" : "Penyempurnaan Jalur Pelayanan Pelanggan",
+              description: isEnglish
+                ? `Address dilemma: "${profile.strategicQuestion || 'How to differentiate sustainably?'}" by streamlining post-purchase support.`
+                : `Menjawab tantangan: "${profile.strategicQuestion || 'Bagaimana diferensiasi yang kokoh?'}" dengan pelayanan ramah dan cepat.`,
+              rationale: isEnglish ? "Leverages observed customer feedback gaps." : "Memanfaatkan celah ulasan negatif yang dialami kompetitor.",
+              evidenceRefs: evidenceRefs.slice(1, 3)
+            }
+          ];
+
+          setAnalysisResult({
+            summary: dynamicSummary,
+            overallConfidence: evidences.length > 2 ? (isEnglish ? "High" : "Tinggi") : (isEnglish ? "Moderate" : "Cukup"),
+            quadrant: {
+              xAxisLabel: isEnglish ? "Commercial Mass vs. Tailored Craft" : "Komersial Massal vs. Keahlian Khusus",
+              yAxisLabel: isEnglish ? "Standard Utility vs. Signature Experience" : "Fungsi Standar vs. Pengalaman Bernilai",
+              points: quadrantPoints
+            },
+            customerSignals,
+            strategyOptions
+          });
+
+          setIsAnalyzing(false);
+          setStep(4);
+        }, 700);
+      };
+
+      // Generator PDF asli
+      const downloadOfficialPDF = () => {
+        if (!analysisResult) return;
+
+        try {
+          const { jsPDF } = window.jspdf || {};
+          if (!jsPDF) {
+            alert(lang === "en" ? "PDF library is initializing. Please retry in a few seconds." : "Pustaka PDF sedang dimuat. Silakan coba sesaat lagi.");
+            return;
+          }
+
+          const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+          const margin = 16;
+          let y = margin;
+
+          // Header
+          doc.setFillColor(101, 35, 43); // Cherry
+          doc.rect(0, 0, 210, 28, "F");
+
+          doc.setTextColor(255, 255, 255);
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(13);
+          doc.text("STRATEGIC POSITIONING & COMPETITIVE ADVANTAGE MAPPER", margin, 12);
+
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(9);
+          doc.text(
+            lang === "en" ? "Official Strategic Decision-Support Dossier" : "Laporan Resmi Pendukung Keputusan Strategis",
+            margin,
+            18
+          );
+
+          doc.setFontSize(8);
+          doc.text(`Generated: ${new Date().toLocaleDateString()} | Confidential`, margin, 23);
+
+          y = 36;
+
+          // 1. Profil Bisnis
+          doc.setTextColor(101, 35, 43);
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(11);
+          doc.text(lang === "en" ? "1. CONFIDENTIAL BUSINESS PROFILE" : "1. PROFIL BISNIS INTERNAL", margin, y);
+          y += 6;
+
+          doc.setTextColor(67, 39, 32);
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(9);
+          const profileLines = [
+            `Brand Name: ${profile.name || "-"}`,
+            `Category: ${profile.category || "-"}`,
+            `Target Customer: ${profile.targetCustomer || "-"}`,
+            `Price Range: ${profile.priceRange || "-"}`,
+            `Value Proposition: ${profile.valueProposition || "-"}`,
+            `Strategic Dilemma: ${profile.strategicQuestion || "-"}`
+          ];
+
+          profileLines.forEach(line => {
+            const splitText = doc.splitTextToSize(line, 178);
+            doc.text(splitText, margin, y);
+            y += splitText.length * 4.5;
+          });
+
+          y += 4;
+
+          // 2. Ringkasan
+          doc.setTextColor(101, 35, 43);
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(11);
+          doc.text(lang === "en" ? "2. STRATEGIC POSITIONING SUMMARY" : "2. RINGKASAN POSISI STRATEGIS", margin, y);
+          y += 6;
+
+          doc.setTextColor(67, 39, 32);
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(9);
+          const summaryLines = doc.splitTextToSize(analysisResult.summary, 178);
+          doc.text(summaryLines, margin, y);
+          y += summaryLines.length * 4.5 + 4;
+
+          // 3. Matriks Kuadran
+          doc.setTextColor(101, 35, 43);
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(11);
+          doc.text(lang === "en" ? "3. 2D QUADRANT COORDINATES" : "3. KOORDINAT KUADRAN 2D", margin, y);
+          y += 6;
+
+          doc.setTextColor(67, 39, 32);
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(8.5);
+          doc.text(`Axes: X [${analysisResult.quadrant.xAxisLabel}] | Y [${analysisResult.quadrant.yAxisLabel}]`, margin, y);
+          y += 5;
+
+          analysisResult.quadrant.points.forEach(pt => {
+            doc.text(`• ${pt.label} (${pt.isUser ? "YOUR ENTERPRISE" : "COMPETITOR"}): X=${pt.x}, Y=${pt.y} [Ref: ${pt.ref}]`, margin + 4, y);
+            y += 4.5;
+          });
+
+          y += 4;
+
+          // 4. Rekomendasi
+          doc.setTextColor(101, 35, 43);
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(11);
+          doc.text(lang === "en" ? "4. STRATEGIC DIFFERENTIATION OPTIONS" : "4. OPSI STRATEGIS DIFERENSIASI", margin, y);
+          y += 6;
+
+          doc.setTextColor(67, 39, 32);
+          analysisResult.strategyOptions.forEach((opt, idx) => {
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(9);
+            const isAdopted = adoptedOptions.includes(opt.id);
+            doc.text(`${idx + 1}. ${opt.title} ${isAdopted ? "[ADOPTED]" : ""}`, margin, y);
+            y += 4.5;
+
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(8.5);
+            const optLines = doc.splitTextToSize(`Action: ${opt.description} | Rationale: ${opt.rationale} [Refs: ${opt.evidenceRefs.join(', ')}]`, 174);
+            doc.text(optLines, margin + 4, y);
+            y += optLines.length * 4.2 + 3;
+          });
+
+          // Footer
+          doc.setDrawColor(236, 170, 178);
+          doc.line(margin, 280, 210 - margin, 280);
+          doc.setFontSize(7.5);
+          doc.setTextColor(100, 100, 100);
+          doc.text("Developers: Kania Hansdinata & Agung Purnomo | kania.hansdinata@binus.ac.id", margin, 285);
+
+          const fileName = `${(profile.name || "Business").replace(/\s+/g, "_")}_Strategic_Positioning_Report.pdf`;
+          doc.save(fileName);
+        } catch (err) {
+          console.error("PDF generation failed:", err);
+          window.print();
+        }
+      };
+
+      return (
+        <div className="min-h-screen flex flex-col font-sans bg-[#F8E5D7] text-[#432720]">
+          {/* NAVBAR */}
+          <header className="sticky top-0 z-40 bg-[#65232B] text-white shadow-md border-b border-[#ECAAB2]/30">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+              <div 
+                onClick={() => setActivePage("home")}
+                className="flex items-center gap-2.5 cursor-pointer hover:opacity-95 transition"
+              >
+                <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center border border-[#ECAAB2]/40">
+                  <Compass className="w-5 h-5 text-[#ECAAB2]" />
+                </div>
+                <span className="font-bold text-base tracking-tight">{t.appTitle}</span>
+              </div>
+
+              <nav className="flex items-center gap-3 sm:gap-6 text-xs sm:text-sm font-medium">
+                <button 
+                  onClick={() => setActivePage("home")}
+                  className={`transition hover:text-[#ECAAB2] ${activePage === "home" ? "text-[#ECAAB2] font-bold" : "text-white/90"}`}
+                >
+                  {t.navHome}
+                </button>
+                <button 
+                  onClick={() => setActivePage("app")}
+                  className={`transition hover:text-[#ECAAB2] ${activePage === "app" ? "text-[#ECAAB2] font-bold" : "text-white/90"}`}
+                >
+                  {t.navAnalyze}
+                </button>
+
+                {/* Language Switch */}
+                <div className="flex items-center bg-[#432720] p-0.5 rounded-full border border-[#ECAAB2]/40">
+                  <button
+                    onClick={() => handleLanguageSwitch("id")}
+                    className={`px-2.5 py-1 rounded-full text-xs font-bold transition ${
+                      lang === "id" ? "bg-[#65232B] text-white shadow-sm" : "text-[#ECAAB2]"
+                    }`}
+                  >
+                    ID
+                  </button>
+                  <button
+                    onClick={() => handleLanguageSwitch("en")}
+                    className={`px-2.5 py-1 rounded-full text-xs font-bold transition ${
+                      lang === "en" ? "bg-[#65232B] text-white shadow-sm" : "text-[#ECAAB2]"
+                    }`}
+                  >
+                    EN
+                  </button>
+                </div>
+              </nav>
+            </div>
+          </header>
+
+          {/* MAIN CONTAINER */}
+          <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-8">
+            {/* VIEW 1: LANDING PAGE */}
+            {activePage === "home" && (
+              <div className="space-y-12">
+                <div className="bg-white rounded-3xl p-8 sm:p-12 border border-[#ECAAB2] shadow-sm relative overflow-hidden">
+                  <div className="max-w-3xl space-y-4">
+                    <div className="inline-flex items-center gap-2 bg-[#F8E5D7] px-3.5 py-1.5 rounded-full text-xs font-bold text-[#65232B] border border-[#ECAAB2]">
+                      <Sparkles className="w-4 h-4 text-[#65232B]" />
+                      <span>{t.evidenceBadge}</span>
+                    </div>
+                    <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#65232B] leading-tight">
+                      {t.heroTitle}
+                    </h1>
+                    <p className="text-sm sm:text-base text-[#432720]/80 leading-relaxed">
+                      {t.heroSubtitle}
+                    </p>
+                    <div className="pt-4 flex flex-wrap gap-4">
+                      <button
+                        onClick={() => { setActivePage("app"); setStep(1); }}
+                        className="flex items-center gap-2 bg-[#65232B] text-white px-6 py-3.5 rounded-xl font-bold text-sm hover:bg-[#432720] transition shadow-md"
+                      >
+                        <span>{t.startMapping}</span>
+                        <ArrowRight className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={loadDemoData}
+                        className="flex items-center gap-2 bg-[#F8E5D7] text-[#65232B] px-5 py-3.5 rounded-xl font-bold text-sm border border-[#ECAAB2] hover:bg-[#ECAAB2]/30 transition"
+                      >
+                        <Database className="w-4 h-4" />
+                        <span>{t.loadDemo}</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {t.homeCards.map((card, idx) => (
+                    <div key={idx} className="bg-white p-6 rounded-2xl border border-[#ECAAB2] shadow-sm space-y-2">
+                      <h3 className="font-extrabold text-[#65232B] text-base">{card.title}</h3>
+                      <p className="text-xs sm:text-sm text-[#432720]/80 leading-relaxed">{card.desc}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* VIEW 2: ALUR ANALISIS 4 TAHAP */}
+            {activePage === "app" && (
+              <div className="space-y-6">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                  {[
+                    { n: 1, label: t.steps.profile },
+                    { n: 2, label: t.steps.competitors },
+                    { n: 3, label: t.steps.evidence },
+                    { n: 4, label: t.steps.dashboard }
+                  ].map((s) => (
+                    <button
+                      key={s.n}
+                      onClick={() => setStep(s.n)}
+                      className={`p-3.5 text-left rounded-2xl border text-xs font-bold transition flex items-center justify-between ${
+                        step === s.n
+                          ? "bg-[#65232B] text-white border-[#65232B] shadow-md"
+                          : "bg-white text-[#432720] border-[#ECAAB2]/60 hover:bg-[#F8E5D7]/50"
+                      }`}
+                    >
+                      <span>{s.label}</span>
+                      {step > s.n && <Check className="w-3.5 h-3.5 text-[#ECAAB2]" />}
+                    </button>
+                  ))}
+                </div>
+
+                {/* STEP 1: FORM PROFIL */}
+                {step === 1 && (
+                  <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#ECAAB2] shadow-sm space-y-6">
+                    <div>
+                      <h2 className="text-xl font-extrabold text-[#65232B]">{t.profileSection.title}</h2>
+                      <p className="text-xs text-[#432720]/70 mt-1">{t.profileSection.subtitle}</p>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-bold text-[#432720] mb-1">{t.profileSection.nameLabel}</label>
+                        <input
+                          type="text"
+                          value={profile.name}
+                          onChange={(e) => setProfile({ ...profile, name: e.target.value })}
+                          className="w-full text-sm p-3 rounded-xl border border-[#ECAAB2] focus:ring-2 focus:ring-[#65232B] bg-[#F8E5D7]/10"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-[#432720] mb-1">{t.profileSection.categoryLabel}</label>
+                        <input
+                          type="text"
+                          value={profile.category}
+                          onChange={(e) => setProfile({ ...profile, category: e.target.value })}
+                          className="w-full text-sm p-3 rounded-xl border border-[#ECAAB2] focus:ring-2 focus:ring-[#65232B] bg-[#F8E5D7]/10"
+                        />
+                      </div>
+                      <div className="sm:col-span-2">
+                        <label className="block text-xs font-bold text-[#432720] mb-1">{t.profileSection.offersLabel}</label>
+                        <input
+                          type="text"
+                          value={profile.offers}
+                          onChange={(e) => setProfile({ ...profile, offers: e.target.value })}
+                          className="w-full text-sm p-3 rounded-xl border border-[#ECAAB2] focus:ring-2 focus:ring-[#65232B] bg-[#F8E5D7]/10"
+                        />
+                      </div>
+                      <div className="sm:col-span-2">
+                        <label className="block text-xs font-bold text-[#432720] mb-1">{t.profileSection.targetLabel}</label>
+                        <input
+                          type="text"
+                          value={profile.targetCustomer}
+                          onChange={(e) => setProfile({ ...profile, targetCustomer: e.target.value })}
+                          className="w-full text-sm p-3 rounded-xl border border-[#ECAAB2] focus:ring-2 focus:ring-[#65232B] bg-[#F8E5D7]/10"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-[#432720] mb-1">{t.profileSection.priceLabel}</label>
+                        <input
+                          type="text"
+                          value={profile.priceRange}
+                          onChange={(e) => setProfile({ ...profile, priceRange: e.target.value })}
+                          className="w-full text-sm p-3 rounded-xl border border-[#ECAAB2] focus:ring-2 focus:ring-[#65232B] bg-[#F8E5D7]/10"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-[#432720] mb-1">{t.profileSection.channelsLabel}</label>
+                        <input
+                          type="text"
+                          value={profile.channels}
+                          onChange={(e) => setProfile({ ...profile, channels: e.target.value })}
+                          className="w-full text-sm p-3 rounded-xl border border-[#ECAAB2] focus:ring-2 focus:ring-[#65232B] bg-[#F8E5D7]/10"
+                        />
+                      </div>
+                      <div className="sm:col-span-2">
+                        <label className="block text-xs font-bold text-[#432720] mb-1">{t.profileSection.valuePropLabel}</label>
+                        <textarea
+                          rows={2}
+                          value={profile.valueProposition}
+                          onChange={(e) => setProfile({ ...profile, valueProposition: e.target.value })}
+                          className="w-full text-sm p-3 rounded-xl border border-[#ECAAB2] focus:ring-2 focus:ring-[#65232B] bg-[#F8E5D7]/10"
+                        />
+                      </div>
+                      <div className="sm:col-span-2">
+                        <label className="block text-xs font-bold text-[#432720] mb-1">{t.profileSection.strategicQuestionLabel}</label>
+                        <textarea
+                          rows={2}
+                          value={profile.strategicQuestion}
+                          onChange={(e) => setProfile({ ...profile, strategicQuestion: e.target.value })}
+                          className="w-full text-sm p-3 rounded-xl border border-[#ECAAB2] focus:ring-2 focus:ring-[#65232B] bg-[#F8E5D7]/10"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex justify-end pt-4 border-t border-[#ECAAB2]/40">
+                      <button
+                        onClick={() => setStep(2)}
+                        className="flex items-center gap-2 bg-[#65232B] text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-[#432720] transition shadow"
+                      >
+                        <span>{t.profileSection.nextBtn}</span>
+                        <ArrowRight className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* STEP 2: KOMPETITOR */}
+                {step === 2 && (
+                  <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#ECAAB2] shadow-sm space-y-6">
+                    <div>
+                      <h2 className="text-xl font-extrabold text-[#65232B]">{t.competitorSection.title}</h2>
+                      <p className="text-xs text-[#432720]/70 mt-1">{t.competitorSection.subtitle}</p>
+                    </div>
+
+                    <div className="space-y-3">
+                      {competitors.map((comp) => (
+                        <div
+                          key={comp.id}
+                          className={`p-4 rounded-2xl border transition flex items-start justify-between gap-4 ${
+                            comp.confirmed ? "bg-[#F8E5D7]/40 border-[#65232B]" : "bg-white border-[#ECAAB2]/50 opacity-60"
+                          }`}
+                        >
+                          <div>
+                            <span className="font-extrabold text-[#65232B] text-base">{comp.name}</span>
+                            <p className="text-xs text-[#432720] mt-1">
+                              {t.competitorSection.categoryText}: {comp.category} • {t.competitorSection.priceText}: {comp.priceRange}
+                            </p>
+                            <p className="text-xs text-[#65232B] italic mt-0.5">
+                              "{t.competitorSection.relevanceText}: {comp.relevanceReason}"
+                            </p>
+                          </div>
+                          <button
+                            onClick={() => {
+                              setCompetitors(competitors.map(c => c.id === comp.id ? { ...c, confirmed: !c.confirmed } : c));
+                            }}
+                            className="px-3 py-1.5 rounded-xl text-xs font-bold border border-[#65232B] bg-[#65232B] text-white"
+                          >
+                            {comp.confirmed ? "Aktif" : "Sertakan"}
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="flex justify-between items-center pt-4 border-t border-[#ECAAB2]/40">
+                      <button onClick={() => setStep(1)} className="text-xs font-bold text-[#432720] underline">
+                        {t.competitorSection.backBtn}
+                      </button>
+                      <button
+                        onClick={() => setStep(3)}
+                        className="flex items-center gap-2 bg-[#65232B] text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-[#432720] transition shadow"
+                      >
+                        <span>{t.competitorSection.nextBtn}</span>
+                        <ArrowRight className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* STEP 3: BUKTI DATA */}
+                {step === 3 && (
+                  <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#ECAAB2] shadow-sm space-y-6">
+                    <div>
+                      <h2 className="text-xl font-extrabold text-[#65232B]">{t.evidenceSection.title}</h2>
+                      <p className="text-xs text-[#432720]/70 mt-1">{t.evidenceSection.subtitle}</p>
+                    </div>
+
+                    <div className="space-y-3">
+                      {evidences.map((ev) => (
+                        <div key={ev.id} className="p-4 rounded-2xl bg-[#F8E5D7]/30 border border-[#ECAAB2] space-y-2">
+                          <div className="flex items-center justify-between text-xs font-bold text-[#65232B]">
+                            <span>[{ev.id}] {ev.platform} ({ev.dimension})</span>
+                            <span className="text-[#432720]/80">{ev.capturedAt}</span>
+                          </div>
+                          <p className="text-xs sm:text-sm text-[#432720] bg-white p-3 rounded-xl border border-[#ECAAB2]/40">
+                            "{ev.rawExcerpt}"
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="flex justify-between items-center pt-4 border-t border-[#ECAAB2]/40">
+                      <button onClick={() => setStep(2)} className="text-xs font-bold text-[#432720] underline">
+                        {t.evidenceSection.backBtn}
+                      </button>
+                      <button
+                        onClick={executeAnalysis}
+                        disabled={isAnalyzing}
+                        className="flex items-center gap-2 bg-[#65232B] text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-[#432720] transition shadow disabled:opacity-50"
+                      >
+                        {isAnalyzing ? (
+                          <>
+                            <RefreshCw className="w-4 h-4 animate-spin" />
+                            <span>{t.evidenceSection.analyzingText}</span>
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="w-4 h-4 text-[#ECAAB2]" />
+                            <span>{t.evidenceSection.runAnalysisBtn}</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* STEP 4: HASIL ANALISIS & DOWNLOAD PDF */}
+                {step === 4 && analysisResult && (
+                  <div className="space-y-6">
+                    {/* Ringkasan */}
+                    <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#ECAAB2] shadow-sm space-y-3">
+                      <div className="flex items-center justify-between">
+                        <h2 className="text-xl font-extrabold text-[#65232B]">{t.dashboardSection.summaryTitle}</h2>
+                        <span className="text-xs font-bold bg-[#65232B] text-white px-3 py-1 rounded-full">
+                          {t.dashboardSection.confidenceText}: {analysisResult.overallConfidence}
+                        </span>
+                      </div>
+                      <p className="text-xs sm:text-sm text-[#432720] bg-[#F8E5D7]/40 p-4 rounded-2xl border border-[#ECAAB2]/50 leading-relaxed">
+                        {analysisResult.summary}
+                      </p>
+                    </div>
+
+                    {/* Plot Kuadran 2D */}
+                    <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#ECAAB2] shadow-sm space-y-4">
+                      <h3 className="font-extrabold text-[#65232B] text-lg">{t.dashboardSection.quadrantTitle}</h3>
+                      <div className="relative w-full aspect-square max-w-[440px] mx-auto bg-[#F8E5D7]/50 rounded-2xl border border-[#ECAAB2] p-8 flex items-center justify-center">
+                        <div className="absolute w-full h-[1.5px] bg-[#432720]/30 left-0" />
+                        <div className="absolute h-full w-[1.5px] bg-[#432720]/30 top-0" />
+
+                        <div className="absolute top-2 text-[11px] font-bold text-[#65232B] text-center w-full">
+                          ▲ {analysisResult.quadrant.yAxisLabel.split(" vs. ")[1] || "+ Value"}
+                        </div>
+                        <div className="absolute bottom-2 text-[11px] font-bold text-[#432720]/80 text-center w-full">
+                          ▼ {analysisResult.quadrant.yAxisLabel.split(" vs. ")[0] || "- Standard"}
+                        </div>
+                        <div className="absolute right-2 top-1/2 -translate-y-1/2 text-[11px] font-bold text-[#65232B]">
+                          ► {analysisResult.quadrant.xAxisLabel.split(" vs. ")[1] || "+ Craft"}
+                        </div>
+                        <div className="absolute left-2 top-1/2 -translate-y-1/2 text-[11px] font-bold text-[#432720]/80">
+                          ◄ {analysisResult.quadrant.xAxisLabel.split(" vs. ")[0] || "- Mass"}
+                        </div>
+
+                        {analysisResult.quadrant.points.map((pt, idx) => {
+                          const leftPercent = 50 + (pt.x / 10) * 36;
+                          const topPercent = 50 - (pt.y / 10) * 36;
+
+                          return (
+                            <div
+                              key={idx}
+                              className="absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center"
+                              style={{ left: `${leftPercent}%`, top: `${topPercent}%` }}
+                            >
+                              <div className={`w-4 h-4 rounded-full border-2 ${pt.isUser ? "bg-[#65232B] border-white ring-4 ring-[#ECAAB2]" : "bg-[#432720] border-white"}`} />
+                              <span className={`text-[10px] font-bold mt-1 px-2 py-0.5 rounded-full border ${pt.isUser ? "bg-[#65232B] text-white border-[#65232B]" : "bg-white text-[#432720] border-[#ECAAB2]"}`}>
+                                {pt.label}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Tombol Unduh PDF Resmi */}
+                    <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#ECAAB2] shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+                      <div>
+                        <h3 className="font-extrabold text-[#65232B] text-lg">Dokumen Laporan Strategis Lengkap</h3>
+                        <p className="text-xs text-[#432720]/80">Ekspor seluruh hasil pemetaan posisi, sinyal pelanggan, dan rencana aksi ke berkas PDF resmi.</p>
+                      </div>
+                      <button
+                        onClick={downloadOfficialPDF}
+                        className="flex items-center gap-2 bg-[#65232B] text-white px-6 py-3.5 rounded-xl font-bold text-sm hover:bg-[#432720] transition shadow-md"
+                      >
+                        <FileDown className="w-5 h-5 text-[#ECAAB2]" />
+                        <span>{t.dashboardSection.downloadPdfBtn}</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </main>
+
+          {/* FOOTER */}
+          <footer className="bg-[#432720] text-[#F8E5D7] mt-16 border-t border-[#65232B]">
+            <div className="max-w-6xl mx-auto px-4 py-8 text-center text-xs text-[#F8E5D7]/80">
+              <p className="font-semibold text-white">Strategic Positioning & Competitive Advantage Mapper</p>
+              <p className="mt-1 text-[#ECAAB2]">Founders & Developers: Kania Hansdinata & Agung Purnomo (kania.hansdinata@binus.ac.id)</p>
+              <p className="mt-4 text-[11px] text-[#F8E5D7]/50">© 2026 Seluruh hak cipta dilindungi.</p>
+            </div>
+          </footer>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
